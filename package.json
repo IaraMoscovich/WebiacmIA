@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "fastapi": "^0.0.8",
+    "pip": "^0.0.1",
     "plt": "^1.0.0",
-    "requests": "^0.3.0"
+    "requests": "^0.3.0",
+    "upgrade": "^1.1.0"
   }
 }

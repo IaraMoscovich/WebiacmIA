@@ -14,13 +14,3 @@ import matplotlib.pyplot as plt
 import glob
 import random
 import os
-
-!pip install ultralytics
-
-!yolo task=detect \
-mode=predict \
-model= /content/modelo.pt \
-source= /content/inpy.jpg \
-imgsz=1280 \
-name=output \
-hide_labels=True
