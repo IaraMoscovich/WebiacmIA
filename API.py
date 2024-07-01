@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 import io
 from PIL import Image
 
+from ultralytics import YOLO
+model = YOLO("modelo.pt")
+
 app = FastAPI()
 
 @app.post("/upload-image/")
@@ -13,7 +16,7 @@ async def upload_image(file: UploadFile = File(...)):
         image = Image.open(io.BytesIO(image_bytes))
         
         # Process the image (for demonstration purposes, we'll just get its format)
-        #image_format = Clasify(image)
+        image_format = model(image)
         
         # Return a string response
         return JSONResponse(content={"message": f"{image_format}"})
