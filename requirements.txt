@@ -1,6 +1,7 @@
-fastapi[all]
+fastapi
+uvicorn
 
-!pip install ultralytics
+ultralytics
 
 !yolo task=detect \
 mode=predict \
