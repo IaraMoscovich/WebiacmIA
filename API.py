@@ -2,11 +2,23 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import io
 from PIL import Image
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 from ultralytics import YOLO
 model = YOLO("modelo.pt")
 
-app = FastAPI()
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
