@@ -27,8 +27,10 @@ async def upload_image(file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         
+        
         # Process the image (for demonstration purposes, we'll just get its format)
         image_format = model(image)
+        print(image_format)
         
         # Return a string response
         return JSONResponse(content={"message": f"{image_format}"})
