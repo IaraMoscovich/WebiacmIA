@@ -4,6 +4,7 @@ import io
 from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import logging
 
 app = FastAPI()
 
@@ -17,8 +18,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logging.info("Importing Ultralytics YOLO")
+
 from ultralytics import YOLO
+
+logging.info("Loading YOLO modelo.pt")
 model = YOLO("modelo.pt")
+logging.info("YOLO modelo.pt Loaded")
 
 
 @app.post("/upload-image/")
