@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
 import numpy as np
 import os
+import supabase
 from supabase import create_client, Client
 
 app = FastAPI()
