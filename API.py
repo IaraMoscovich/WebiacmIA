@@ -5,6 +5,8 @@ from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
 import numpy as np
+import os
+from supabase import create_client, Client
 
 app = FastAPI()
 
@@ -60,9 +62,6 @@ async def upload_image(file: UploadFile = File(...)):
         })
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
-
-import os
-from supabase import create_client, Client
 
 url: str ="https://afwgthjhqrgxizqydmvs.supabase.co"
 key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
