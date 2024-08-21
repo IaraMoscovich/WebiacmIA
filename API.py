@@ -12,12 +12,12 @@ from supabase import create_client, Client
 app = FastAPI()
 
 # Configuración de CORS
-origins = ["*"]
+origins = ["http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    # allow_credentials=True,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -68,11 +68,9 @@ url: str ="https://afwgthjhqrgxizqydmvs.supabase.co"
 key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
 supabase: Client = create_client(url, key) 
 
-positivos = 5
-negativos = 10
-celulas_positivas = (positivos/negativos)*100
+celulas_positivas = (boxes/boxes)*100
 
-response = supabase.table("datos").insert({"positivos": positivos, "negativos": negativos, "celulas_positivas": celulas_positivas}).execute()
+response = supabase.table("datos").insert({"positivos":  boxes, "negativos":  boxes, "celulas_positivas": celulas_positivas}).execute()
 
 if __name__ == "__main__":
     import uvicorn
