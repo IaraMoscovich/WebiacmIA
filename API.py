@@ -5,24 +5,25 @@ from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
 import numpy as np
-import os
-import supabase
 from supabase import create_client, Client
 
 app = FastAPI()
 
 # Configuración de CORS
-origins = ["http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    # allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Asegúrate de permitir los métodos necesarios
     allow_headers=["*"],
 )
 
-# Cargar el modelo
 model = YOLO("modelo.pt")
+
+# Configuración de Supabase
+url: str = "https://afwgthjhqrgxizqydmvs.supabase.co"
+key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
+supabase: Client = create_client(url, key)
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
@@ -30,37 +31,28 @@ async def upload_image(file: UploadFile = File(...)):
         # Leer el archivo de imagen
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
-
-        # Convertir la imagen a formato adecuado para el modelo
         image_np = np.array(image)
-        
-        # Procesar la imagen con el modelo
         results = model(image_np)
+        boxes = results.pandas().xyxy[0]  # Aquí obtenemos las cajas como un DataFrame
 
-        # Extraer datos de los resultados
-        boxes = results.boxes  # Objeto Boxes con las coordenadas y más
-        names = results.names  # Diccionario de nombres de clases
-        orig_img = image_np    # Imagen original en formato numpy array
-        orig_shape = results.orig_shape  # Forma original de la imagen
-        speed = results.speed  # Tiempos de procesamiento
+        ki67_positivos = len(boxes[boxes['class'] == 0])  # Suponiendo clase 0 para positivos
+        ki67_negativos = len(boxes[boxes['class'] == 1])  # Suponiendo clase 1 para negativos
 
-        # Convertir cajas y otros datos a formatos serializables
-        boxes_data = []
-        for box in boxes:
-            box_data = {
-                "coordinates": box.xyxy.tolist(),  # Coordenadas de la caja
-                "class_id": box.cls.tolist(),       # ID de la clase
-                "confidence": box.conf.tolist()      # Puntaje de confianza
-            }
-            boxes_data.append(box_data)
 
-        # Retornar datos como JSON
-        return JSONResponse(content={
-            "boxes": boxes_data,
-            "names": names,
-            "orig_shape": orig_shape,
-            "speed": speed
+        response = supabase.table("datos").insert({
+            "ki67_positivos": ki67_positivos,
+            "ki67_negativos": ki67_negativos,
+
         })
+        
+        if response.error:
+            raise Exception(f"Error saving data: {response.error.message}")
+
+        return JSONResponse(content={
+            "ki67_positivos": ki67_positivos,
+            "ki67_negativos": ki67_negativos,
+        })
+
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
 
@@ -74,5 +66,4 @@ supabase: Client = create_client(url, key)
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
