@@ -31,7 +31,7 @@ async def upload_image(file: UploadFile = File(...)):
         # Leer el archivo de imagen
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
-        image_np = np.array(image)
+       """ image_np = np.array(image)
         results = model(image_np)
         boxes = results.pandas().xyxy[0]  # Aquí obtenemos las cajas como un DataFrame
 
@@ -43,7 +43,8 @@ async def upload_image(file: UploadFile = File(...)):
             "ki67_positivos": ki67_positivos,
             "ki67_negativos": ki67_negativos,
 
-        }).execute()
+        })
+        .execute()
 
         if response.error:
             raise Exception(f"Error saving data: {response.error.message}")
@@ -51,7 +52,7 @@ async def upload_image(file: UploadFile = File(...)):
         return JSONResponse(content={
             "ki67_positivos": ki67_positivos,
             "ki67_negativos": ki67_negativos,
-        })
+        })"""
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
