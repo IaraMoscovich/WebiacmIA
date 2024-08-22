@@ -18,8 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Cargar el modelo
 model = YOLO("modelo.pt")
 
 # Configuración de Supabase
@@ -33,15 +31,8 @@ async def upload_image(file: UploadFile = File(...)):
         # Leer el archivo de imagen
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
-
-        # Convertir la imagen a formato adecuado para el modelo
         image_np = np.array(image)
-
-        # Procesar la imagen con el modelo
         results = model(image_np)
-
-        # Suponiendo que `results` tiene las propiedades `boxes` y `speed`
-        # Extraer datos de los resultados
         boxes = results.pandas().xyxy[0]  # Aquí obtenemos las cajas como un DataFrame
 
         ki67_positivos = len(boxes[boxes['class'] == 0])  # Suponiendo clase 0 para positivos
