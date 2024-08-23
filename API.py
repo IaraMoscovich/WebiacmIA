@@ -33,36 +33,17 @@ async def upload_image(file: UploadFile = File(...)):
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
         results = model(image_np)
-        boxes = results.pandas().xyxy[0]  # Aquí obtenemos las cajas como un DataFrame
-
-        ki67_positivos = len(boxes[boxes['class'] == 0])  # Suponiendo clase 0 para positivos
-        ki67_negativos = len(boxes[boxes['class'] == 1])  # Suponiendo clase 1 para negativos
-
-
-        response = supabase.table("datos").insert({
-            "ki67_positivos": ki67_positivos,
-            "ki67_negativos": ki67_negativos,
-
-        })
-        
-        if response.error:
-            raise Exception(f"Error saving data: {response.error.message}")
-
-        return JSONResponse(content={
-            "ki67_positivos": ki67_positivos,
-            "ki67_negativos": ki67_negativos,
-        })
-
+        print(results.probs)
+        return JSONResponse(content=results)
+      
     except Exception as e:
+        print(e)
         return JSONResponse(content={"error": str(e)}, status_code=400)
 
 url: str ="https://afwgthjhqrgxizqydmvs.supabase.co"
 key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
 supabase: Client = create_client(url, key) 
 
-#celulas_positivas = (boxes/boxes)*100
-
-#response = supabase.table("datos").insert({"positivos":  boxes, "negativos":  boxes, "celulas_positivas": celulas_positivas}).execute()
 
 if __name__ == "__main__":
     import uvicorn
