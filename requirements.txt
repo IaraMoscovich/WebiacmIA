@@ -4,3 +4,4 @@ python-multipart
 ultralytics
 gunicorn
 supabase
+pandas

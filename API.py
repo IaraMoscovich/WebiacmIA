@@ -32,9 +32,8 @@ async def upload_image(file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
-        results = model(image_np)
-        print(results.probs)
-        return JSONResponse(content=results)
+        results = model.predict(image_np)
+       # return JSONResponse(content=results)
       
     except Exception as e:
         print(e)
