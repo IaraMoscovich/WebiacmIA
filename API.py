@@ -47,17 +47,32 @@ async def upload_image(file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
-        results = model.predict(image_np)
-
-        # Convertir los resultados a un DataFrame
-        boxes_df = boxes_to_dataframe(results[0].boxes)
+        results = model.predict(image_np, verbose=False, stream=True)
         
 
-        # Convertir el DataFrame a un JSON serializable
-        boxes_json = boxes_df.to_json(orient='records')
-        print(boxes_json)
+        results = list(results)
+        # results[0].plot()
 
-        return JSONResponse(content={"detections": boxes_json})
+        boxes_res = results[0].boxes.numpy()
+
+        classes = boxes_res.cls
+        conf = boxes_res.conf
+        xyxy = boxes_res.xyxy
+
+        count_1 = sum(classes)
+        count_0 = len(classes) - count_1
+
+        print(count_1, count_0)
+        
+        return JSONResponse(
+            content={
+                "positivos": count_1.tolist(),
+                "negativos": count_0.tolist(),
+                "boxes": xyxy.tolist(),
+                "conf": conf.tolist(),
+            }
+        )
+        # return JSONResponse(content={"detections": boxes_json})
 
     except Exception as e:
         print(e)
