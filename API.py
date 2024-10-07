@@ -47,6 +47,7 @@ async def upload_image(file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
+        print(image_np.shape)
         results = model.predict(image_np, verbose=False, stream=True)
         
 
@@ -54,6 +55,7 @@ async def upload_image(file: UploadFile = File(...)):
         # results[0].plot()
 
         boxes_res = results[0].boxes.numpy()
+        # print(boxes_res)
 
         classes = boxes_res.cls
         conf = boxes_res.conf
