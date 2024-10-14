@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-ultralytics
+ultralytics==8.3.9
 gunicorn
 supabase
 pandas

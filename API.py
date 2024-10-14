@@ -7,8 +7,10 @@ from ultralytics import YOLO
 import numpy as np
 import pandas as pd
 from supabase import create_client, Client
+import torch
 
 app = FastAPI()
+torch.manual_seed(0)
 
 # Configuración de CORS
 app.add_middleware(
@@ -40,6 +42,8 @@ def boxes_to_dataframe(boxes):
 
     return df
 
+
+
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     try:
@@ -47,9 +51,7 @@ async def upload_image(file: UploadFile = File(...)):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
-        print(image_np.shape)
         results = model.predict(image_np, verbose=False, stream=True)
-        
 
         results = list(results)
         # results[0].plot()
@@ -83,3 +85,4 @@ async def upload_image(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
