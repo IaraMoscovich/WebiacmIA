@@ -46,13 +46,13 @@ def boxes_to_dataframe(boxes):
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
+    print("fgnf")
     try:
         # Leer el archivo de imagen
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_np = np.array(image)
         results = model.predict(image_np, verbose=False, stream=True)
-
         results = list(results)
         # results[0].plot()
 
