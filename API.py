@@ -46,6 +46,7 @@ def boxes_to_dataframe(boxes):
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
+    print("upload image")
     try:
         # Leer el archivo de imagen
         image_bytes = await file.read()
