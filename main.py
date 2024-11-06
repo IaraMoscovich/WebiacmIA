@@ -18,3 +18,4 @@ async def ia(datos): #chequear que ia datos agarra el directorio de la imagen no
     return {"resultado": results}
 
 #PARA CORRER LOCAL:python -m uvicorn API:app --host 0.0.0.0 --port 8000 --reload
+
