@@ -56,8 +56,8 @@ async def upload_image(file: UploadFile = File(...)):
 
         return JSONResponse(
             content={
-                "positivos": int(count_1),
-                "negativos": int(count_0),
+                "positivos": int(count_0),
+                "negativos": int(count_1),
                 "image": img_base64
             }
         )
