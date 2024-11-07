@@ -29,6 +29,11 @@ url: str = "https://afwgthjhqrgxizqydmvs.supabase.co"
 key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
 supabase: Client = create_client(url, key)
 
+@app.get("/")
+async def main():
+    return {"a": "b"}
+
+
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     try:
