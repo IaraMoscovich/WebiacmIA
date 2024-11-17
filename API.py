@@ -3,71 +3,71 @@ from fastapi.responses import JSONResponse
 import io
 from PIL import Image
 from fastapi.middleware.cors import CORSMiddleware
-from ultralytics import YOLO
-import numpy as np
-import pandas as pd
-from supabase import create_client, Client
-import torch
+import logging
 import base64
+from ultralytics import YOLO
 
 app = FastAPI()
-torch.manual_seed(0)
 
-# Configuración de CORS
+# Configuración CORS
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Cargar modelo YOLO
+logging.info("Cargando modelo YOLO")
 model = YOLO("modelo.pt")
-
-# Configuración de Supabase
-url: str = "https://afwgthjhqrgxizqydmvs.supabase.co"
-key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmd2d0aGpocXJneGl6cXlkbXZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU4Nzg4OTUsImV4cCI6MjAzMTQ1NDg5NX0.Oq0wjvVrT8YJ4Q3q7Ji8-28qljja8h1sEBzZV5oXzzc"
-supabase: Client = create_client(url, key)
-
+logging.info("Modelo YOLO cargado correctamente")
 
 @app.post("/upload-image/")
 async def upload_image(file: UploadFile = File(...)):
     try:
-        # Leer el archivo de imagen
+        # Leer la imagen
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes))
-        image_np = np.array(image)
 
-        # Obtener los resultados de detección
-        results = model.predict(image_np, verbose=False, stream=True)
-        results = list(results)
+        # Ejecutar el modelo YOLO
+        results = model(image)
+        
+        # Inicializar contadores
+        cant_pos = 0
+        cant_neg = 0
 
-        # Convertir la imagen marcada a PIL antes de guardarla
-        marked_image_np = results[0].plot()
-        marked_image_pil = Image.fromarray(marked_image_np)
-        buffered = io.BytesIO()
-        marked_image_pil.save(buffered, format="JPEG")
-        img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        # Procesar resultados
+        for result in results:
+            boxes = result.boxes
+            
+            for box in boxes:
+                if box.cls == 0:  # Clase 0 = positiva
+                    cant_pos += 1
+                else:  # Otras clases = negativas
+                    cant_neg += 1
+        
+        # Anotar la imagen con las detecciones
+        annotated_image = results[0].plot()
+        annotated_image = Image.fromarray(annotated_image)
 
-        # Extraer las cajas de detección y conteos
-        boxes_res = results[0].boxes.numpy()
-        classes = boxes_res.cls
-        count_1 = sum(classes)
-        count_0 = len(classes) - count_1
+        # Convertir la imagen anotada a base64
+        output_buffer = io.BytesIO()
+        annotated_image.save(output_buffer, format="JPEG")
+        base64_image = base64.b64encode(output_buffer.getvalue()).decode("utf-8")
 
-        return JSONResponse(
-            content={
-                "positivos": int(count_0),
-                "negativos": int(count_1),
-                "image": img_base64
-            }
-        )
+        # Crear la respuesta en formato JSON
+        response_data = {
+            "positivos": cant_pos,
+            "negativos": cant_neg,
+            "imagenProcesada": base64_image,
+        }
 
+        return JSONResponse(content=response_data)
     except Exception as e:
-        print("Error al procesar la imagen:", str(e))
         return JSONResponse(content={"error": str(e)}, status_code=400)
 
-
-    if __name__ == "__main__":
-        import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
